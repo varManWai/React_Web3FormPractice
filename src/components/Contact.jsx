@@ -4,6 +4,8 @@ import TextField from "@mui/material/TextField";
 import { styled } from "@mui/material/styles";
 import Button from "@mui/material/Button";
 import { purple } from "@mui/material/colors";
+import LoadingButton from '@mui/lab/LoadingButton';
+import SaveIcon from '@mui/icons-material/Save';
 
 function Contact() {
   const [result, setResult] = React.useState("");
@@ -12,6 +14,7 @@ function Contact() {
     email: "",
     message: "",
   });
+  const [isAvaialble, setIsAvailable] = useState(false);
 
   const onEmailChange = (event) => {
     setInputData({ ...inputData, email: event.target.value });
@@ -21,7 +24,6 @@ function Contact() {
   };
   const onMsgChange = (event) => {
     setInputData({ ...inputData, message: event.target.value });
-    console.log(inputData.message);
   };
 
   const ColorButton = styled(Button)(({ theme }) => ({
@@ -40,14 +42,7 @@ function Contact() {
     formData.append("name", inputData.name);
     formData.append("email", inputData.email);
     formData.append("message", inputData.message);
-
-    console.log(process.env.REACT_APP_WEB3FORM_API_KEY);
-
     formData.append("access_key", process.env.REACT_APP_WEB3FORM_API_KEY);
-
-    formData.forEach((e) => {
-      console.log(e);
-    });
 
     const response = await fetch("https://api.web3forms.com/submit", {
       method: "POST",
@@ -56,6 +51,8 @@ function Contact() {
 
     const data = await response.json();
 
+    
+
     if (data.success) {
       setResult("Form Submitted Successfully");
       setInputData({email:"",name:"",message:""})
@@ -63,6 +60,13 @@ function Contact() {
       console.log("Error", data);
       setResult(data.message);
     }
+
+    setIsAvailable(true);    
+
+    setTimeout(() => {
+        setIsAvailable(false);  
+    }, 10000);
+
   };
 
   return (
@@ -119,7 +123,18 @@ function Contact() {
           className="contact-form-fields"
         />
         
-        <ColorButton  type="submit" variant="contained" className="CM-btn">Send</ColorButton>
+        {isAvaialble === false ?
+            <ColorButton  type="submit" variant="contained" className="CM-btn">Send</ColorButton>
+        :
+        <LoadingButton
+        type="submit" variant="contained" className="CM-btn align-center"
+        loading
+        loadingPosition="center"
+        startIcon={<SaveIcon />}
+        
+        > </LoadingButton>
+        }
+        
         {/* <button type="submit">Submit Form</button> */}
       </form>
       <span className="CM-result">{result}</span>
